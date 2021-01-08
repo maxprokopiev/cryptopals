@@ -25,8 +25,24 @@ module Utils
 
     frequencies(s).reduce(0) do |score, (c, f)|
       score += f if letters.include?(c)
-      score += f*10 if MOST_FREQUENT_LETTERS_EN.include?(c)
+      score += f*10 if (MOST_FREQUENT_LETTERS_EN + [" ", ",", ".", "!", "\n", ":", ";"]).include?(c)
       score
     end
+  end
+
+  def bits(s)
+    s.each_byte.map { |b| b.to_s(2).rjust(8, "0") }.join.scan(/./).map(&:to_i)
+  end
+
+  def hamming_distance(s1, s2)
+    bits(s1).zip(bits(s2)).count { |x, y| x != y }
+  end
+
+  def bits_bytes(s)
+    s.map { |b| b.to_s(2).rjust(8, "0") }.join.scan(/./).map(&:to_i)
+  end
+
+  def hamming_distance_bytes(s1, s2)
+    bits_bytes(s1).zip(bits_bytes(s2)).count { |x, y| x != y }
   end
 end

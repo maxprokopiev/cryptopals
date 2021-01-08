@@ -55,4 +55,31 @@ module Xor
   def test_repeating_xor
     arr_to_hex(repeating_xor("Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal", "ICE")) == "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f"
   end
+
+  def break_repeating_xor
+    bytes = Base64.decode64(File.read("./resources/repeating_xor.txt").split("\n").join).bytes
+
+    keysizes = probable_keysizes(bytes).take(3)
+
+    probable_keys(bytes, keysizes)
+  end
+
+  def probable_keys(bytes, keysizes)
+    keysizes.map do |keysize|
+      transposed = bytes.each_slice(keysize).to_a[0..-2].transpose
+      key = transposed.map do |block|
+        ([" ", ",", ".", "!", "\n", ":", ";"] + ("0".."9").to_a + ("a".."z").to_a + ("A".."Z").to_a).map do |key|
+          str = block.map { |e| e ^ key.bytes.first }.pack("c*")
+          [key, en_score(str)]
+        end.sort_by(&:last).last.first
+      end.join
+    end
+  end
+
+  def probable_keysizes(bytes, precision = 50)
+    (2..40).map do |keysize|
+      v = bytes.each_slice(keysize).take(precision).each_slice(2).map { |x, y| hamming_distance_bytes(x, y) / keysize.to_f }.sum / precision
+      [keysize, v]
+    end.sort_by(&:last).map(&:first)
+  end
 end

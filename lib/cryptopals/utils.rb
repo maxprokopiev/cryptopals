@@ -37,5 +37,10 @@ module Cryptopals
     def hamming_distance(s1, s2)
       bits(s1).zip(bits(s2)).count { |x, y| x != y }
     end
+
+    def pkcs7(bytes, size)
+      padding_byte = size - bytes.size
+      bytes.fill(padding_byte, (bytes.size)..(size - 1))
+    end
   end
 end

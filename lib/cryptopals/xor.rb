@@ -2,13 +2,8 @@ module Cryptopals
   module Xor
     include Utils
 
-    def xor(h1, h2)
-      s1 = hex_to_str(h1)
-      s2 = hex_to_str(h2)
-
-      result = s1.bytes.zip(s2.bytes).map { |x, y| x ^ y }
-
-      arr_to_hex(result)
+    def xor(b1, b2)
+      b1.zip(b2).map { |x, y| x ^ y }
     end
 
     def single_byte_xor(bytes, key)
@@ -33,10 +28,9 @@ module Cryptopals
       end.sort_by(&:last).last
     end
 
-    def repeating_xor(str, key)
-      key = key.bytes
+    def repeating_xor(bytes, key)
       j = -1
-      str.bytes.each_with_index.map do |c, i|
+      bytes.map do |c|
         j = (j + 1) % key.size
         c ^ key[j]
       end

@@ -21,4 +21,10 @@ RSpec.describe Cryptopals::AES do
       expect(decrypt_aes_128_cbc(input, "YELLOW SUBMARINE")).to include("VIP. Vanilla Ice yep, yep, I'm comin' hard like a rhino")
     end
   end
+
+  describe "EcbAttack" do
+    it "decrypts 128 bit AES in ECB mode byte at a time" do
+      expect(Cryptopals::AES::EcbAttack.new.decrypt).to eq "Rollin' in my 5.0\nWith my rag-top down so my hair can blow\nThe girlies on standby waving just to say hi\nDid you stop? No, I just drove by\n"
+    end
+  end
 end

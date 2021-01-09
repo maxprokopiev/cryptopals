@@ -6,6 +6,72 @@ module Cryptopals
     include Utils
     include Xor
 
+    class ConstantKeyECB
+      include AES
+
+      def initialize
+        @key = random_bytes(16).pack("c*")
+        @input = Base64.decode64("Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK")
+      end
+
+      def encrypt(input)
+        encrypt_aes_128_ecb(pad_input(input + @input).pack("c*"), @key)
+      end
+
+      def pad_input(input)
+        if input.size > 16 then
+          pkcs7(input.bytes, ((input.size / 16) + 1) * 16)
+        else
+          pkcs7(input.bytes, 16)
+        end
+      end
+    end
+
+    class EcbAttack
+      include AES
+
+      def initialize(cipher = ConstantKeyECB.new)
+        @cipher = cipher
+        @block_size = block_size
+      end
+
+      def decrypt(round = 0, block_num = 1, result = "")
+        ciphertext = @cipher.encrypt("A" * (@block_size - 1 - round))
+        matching_samples = samples(@block_size - round, result).find { |k, v| v[0..((@block_size - 1)*block_num - 1)] == ciphertext[0..((@block_size - 1)*block_num - 1)] }
+        next_char = if matching_samples then
+                      matching_samples.first[-1]
+                    else
+                      return result[0..-2]
+                    end
+
+        block_num += 1 if (round + 1) % @block_size == 0
+        decrypt((round + 1) % @block_size, block_num, result + next_char)
+      end
+
+      def samples(size, postfix)
+        prefix = "A" * (size - 1) + postfix
+        pairs = (0..255).map do |byte|
+          input = prefix + [byte].pack("c*")
+          [input, @cipher.encrypt(input)]
+        end
+
+        Hash[*pairs.flatten]
+      end
+
+      def mode
+        DetectionOracle.new(@cipher).detect_mode
+      end
+
+      def block_size(size = 1, previous = [])
+        block = @cipher.encrypt("A"*size).bytes.each_slice(size).to_a.first
+        if (previous != []) && (previous == block[0..-2])
+          size - 1
+        else
+          block_size(size + 1, block)
+        end
+      end
+    end
+
     class EncryptionOracle
       include AES
 
@@ -44,6 +110,8 @@ module Cryptopals
     end
 
     class DetectionOracle
+      include AES
+
       def initialize(encryption_oracle)
         @encryption_oracle = encryption_oracle
         @sample_input = ([0]*100).pack("c*")

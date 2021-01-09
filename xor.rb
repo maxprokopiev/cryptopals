@@ -60,7 +60,6 @@ module Xor
     bytes = Base64.decode64(File.read("./resources/repeating_xor.txt").split("\n").join).bytes
 
     keysizes = probable_keysizes(bytes).take(3)
-
     probable_keys(bytes, keysizes)
   end
 

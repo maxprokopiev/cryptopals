@@ -27,4 +27,10 @@ RSpec.describe Cryptopals::AES do
       expect(Cryptopals::AES::EcbAttack.new.decrypt).to eq "Rollin' in my 5.0\nWith my rag-top down so my hair can blow\nThe girlies on standby waving just to say hi\nDid you stop? No, I just drove by\n"
     end
   end
+
+  describe "EcbAttack2" do
+    it "decrypts 128 bit AES in ECB mode byte at a time with random prefix" do
+      expect(Cryptopals::AES::EcbAttack2.new.decrypt).to eq "Rollin' in my 5.0\nWith my rag-top down so my hair can blow\nThe girlies on standby waving just to say hi\nDid you stop? No, I just drove by\n"
+    end
+  end
 end

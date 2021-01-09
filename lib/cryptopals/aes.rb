@@ -9,13 +9,21 @@ module Cryptopals
     class ConstantKeyECB
       include AES
 
-      def initialize
+      def initialize(with_prefix = false)
         @key = random_bytes(16).pack("c*")
+        @with_prefix = with_prefix
+        @prefix = random_bytes(rand(100)).pack("c*")
         @input = Base64.decode64("Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK")
       end
 
       def encrypt(input)
-        encrypt_aes_128_ecb(pad_input(input + @input).pack("c*"), @key)
+        input = if @with_prefix
+          pad_input(@prefix + input + @input).pack("c*")
+        else
+          pad_input(input + @input).pack("c*")
+        end
+
+        encrypt_aes_128_ecb(input, @key)
       end
 
       def pad_input(input)
@@ -27,16 +35,60 @@ module Cryptopals
       end
     end
 
+    class EcbAttack2
+      include AES
+
+      def initialize(cipher = ConstantKeyECB.new(true))
+        @cipher = cipher
+        @block_size = 16
+      end
+
+      def decrypt
+        pad_length, start_block = random_prefix_length
+        pre_processor = Proc.new do |input|
+          ("A" * pad_length) + input
+        end
+        post_processor = Proc.new do |output|
+          output.bytes.drop(start_block * @block_size).pack("c*")
+        end
+        EcbAttack.new(@cipher, post_processor, pre_processor).decrypt
+      end
+
+      def sample_block_ciphertext
+        return @sample_block_ciphertext if @sample_block_ciphertext
+
+        blocks = @cipher.encrypt(("A"*@block_size)*3).bytes.each_slice(@block_size).to_a
+        @sample_block_ciphertext = blocks.zip(blocks[1..-1]).find { |b1, b2| b1 == b2 }[0]
+      end
+
+      def random_prefix_length(i = 0)
+        blocks = @cipher.encrypt("A"*i + "A"*@block_size).bytes.each_slice(@block_size).to_a
+
+        index = blocks.index(sample_block_ciphertext)
+        if index
+          [i, index]
+        else
+          random_prefix_length(i + 1)
+        end
+      end
+    end
+
     class EcbAttack
       include AES
 
-      def initialize(cipher = ConstantKeyECB.new)
+      def initialize(cipher = ConstantKeyECB.new, post_processor = Proc.new { |e| e }, pre_processor = Proc.new { |e| e })
         @cipher = cipher
-        @block_size = block_size
+        @block_size = 16 # block_size
+        @post_processor = post_processor
+        @pre_processor = pre_processor
+      end
+
+      def encrypt(input)
+        @post_processor.call(@cipher.encrypt(@pre_processor.call(input)))
       end
 
       def decrypt(round = 0, block_num = 1, result = "")
-        ciphertext = @cipher.encrypt("A" * (@block_size - 1 - round))
+        ciphertext = encrypt("A" * (@block_size - 1 - round))
         matching_samples = samples(@block_size - round, result).find { |k, v| v[0..((@block_size - 1)*block_num - 1)] == ciphertext[0..((@block_size - 1)*block_num - 1)] }
         next_char = if matching_samples then
                       matching_samples.first[-1]
@@ -52,7 +104,7 @@ module Cryptopals
         prefix = "A" * (size - 1) + postfix
         pairs = (0..255).map do |byte|
           input = prefix + [byte].pack("c*")
-          [input, @cipher.encrypt(input)]
+          [input, encrypt(input)]
         end
 
         Hash[*pairs.flatten]

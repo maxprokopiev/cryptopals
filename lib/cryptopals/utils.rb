@@ -42,5 +42,12 @@ module Cryptopals
       padding_byte = size - bytes.size
       bytes.fill(padding_byte, (bytes.size)..(size - 1))
     end
+
+    def strip_pkcs7(bytes)
+      last = bytes.last
+      raise Error.new unless bytes[-last..-1] == [last] * 4
+
+      bytes[0..-(last + 1)]
+    end
   end
 end

@@ -12,21 +12,25 @@ module Cryptopals
       bytes.map { |e| e ^ key }
     end
 
-    def break_single_byte_xor(s)
-      with_max_score(s)[1]
-    end
-
-    def with_max_score(s)
-      s = hex_to_str(s)
+    def with_max_score(bytes)
       EN_TEXT_CHARS.map do |key|
-        str = single_byte_xor(s.bytes, key.bytes.first).pack("c*")
+        str = single_byte_xor(bytes, key.bytes.first).pack("c*")
         [str, key, en_score(str)]
       end.sort_by(&:last).last
     end
 
+    def get_key_in_single_byte_xor(bytes)
+      with_max_score(bytes)[1]
+    end
+
+    def break_single_byte_xor(s)
+      s = hex_to_str(s).bytes
+      get_key_in_single_byte_xor(s)
+    end
+
     def detect_single_char_xor(lines)
       lines.map do |l|
-        with_max_score(l)
+        with_max_score(hex_to_str(l).bytes)
       end.sort_by(&:last).last
     end
 
@@ -46,11 +50,8 @@ module Cryptopals
     def probable_keys(bytes, keysizes)
       keysizes.map do |keysize|
         transposed = bytes.each_slice(keysize).to_a[0..-2].transpose
-        key = transposed.map do |block|
-          EN_TEXT_CHARS.map do |key|
-            str = block.map { |e| e ^ key.bytes.first }.pack("c*")
-            [key, en_score(str)]
-          end.sort_by(&:last).last.first
+        transposed.map do |block|
+          get_key_in_single_byte_xor(block)
         end.join
       end
     end

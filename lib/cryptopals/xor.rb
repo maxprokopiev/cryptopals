@@ -61,7 +61,7 @@ module Cryptopals
 
     def probable_keysizes(bytes, precision = 50)
       (2..40).map do |keysize|
-        v = bytes.each_slice(keysize).take(precision).each_slice(2).map { |x, y| hamming_distance_bytes(x, y) / keysize.to_f }.sum / precision
+        v = bytes.each_slice(keysize).take(precision).each_slice(2).map { |x, y| hamming_distance(x, y) / keysize.to_f }.sum / precision
         [keysize, v]
       end.sort_by(&:last).map(&:first)
     end

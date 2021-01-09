@@ -26,7 +26,14 @@ RSpec.describe Cryptopals::Xor do
 
   describe "#break_single_byte_xor" do
     it "detects key used in single-byte XOR" do
-      expect(break_single_byte_xor("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736")).to eq "x"
+      expect(break_single_byte_xor("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736")).to eq "X"
+    end
+  end
+
+  describe "#single_byte_xor" do
+    it "encodes a string using single byte XOR" do
+      bytes = hex_to_str("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736").bytes
+      expect(single_byte_xor(bytes, "X".bytes.first).pack("c*")).to eq "Cooking MC's like a pound of bacon"
     end
   end
 

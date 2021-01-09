@@ -2,6 +2,8 @@ module Cryptopals
   module Xor
     include Utils
 
+    EN_TEXT_CHARS = [" ", ",", ".", "!", "\n", ":", ";"] + ("0".."9").to_a + ("a".."z").to_a + ("A".."Z").to_a
+
     def xor(b1, b2)
       b1.zip(b2).map { |x, y| x ^ y }
     end
@@ -16,7 +18,7 @@ module Cryptopals
 
     def with_max_score(s)
       s = hex_to_str(s)
-      (("0".."9").to_a + ("a".."z").to_a).map do |key|
+      EN_TEXT_CHARS.map do |key|
         str = single_byte_xor(s.bytes, key.bytes.first).pack("c*")
         [str, key, en_score(str)]
       end.sort_by(&:last).last
@@ -45,7 +47,7 @@ module Cryptopals
       keysizes.map do |keysize|
         transposed = bytes.each_slice(keysize).to_a[0..-2].transpose
         key = transposed.map do |block|
-          ([" ", ",", ".", "!", "\n", ":", ";"] + ("0".."9").to_a + ("a".."z").to_a + ("A".."Z").to_a).map do |key|
+          EN_TEXT_CHARS.map do |key|
             str = block.map { |e| e ^ key.bytes.first }.pack("c*")
             [key, en_score(str)]
           end.sort_by(&:last).last.first

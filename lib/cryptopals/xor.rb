@@ -11,8 +11,8 @@ module Cryptopals
       arr_to_hex(result)
     end
 
-    def single_byte_xor(s, key)
-      s.bytes.map { |e| e ^ key }
+    def single_byte_xor(bytes, key)
+      bytes.map { |e| e ^ key }
     end
 
     def break_single_byte_xor(s)
@@ -22,7 +22,7 @@ module Cryptopals
     def with_max_score(s)
       s = hex_to_str(s)
       (("0".."9").to_a + ("a".."z").to_a).map do |key|
-        str = single_byte_xor(s, key.bytes.first).pack("c*")
+        str = single_byte_xor(s.bytes, key.bytes.first).pack("c*")
         [str, key, en_score(str)]
       end.sort_by(&:last).last
     end

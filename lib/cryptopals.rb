@@ -4,6 +4,7 @@ require "cryptopals/xor"
 require "cryptopals/aes"
 require "cryptopals/cut_and_paste"
 require "cryptopals/cbc_bit_flipping"
+require "cryptopals/cbc_padding_oracle"
 
 module Cryptopals
   class Error < StandardError; end

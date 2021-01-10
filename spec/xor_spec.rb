@@ -26,7 +26,7 @@ RSpec.describe Cryptopals::Xor do
 
   describe "#break_single_byte_xor" do
     it "detects key used in single-byte XOR" do
-      expect(break_single_byte_xor("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736")).to eq "X"
+      expect(break_single_byte_xor("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736")).to eq "X".bytes.first
     end
   end
 
@@ -40,7 +40,7 @@ RSpec.describe Cryptopals::Xor do
   describe "#detect_single_char_xor" do
     it "detects single-byte xor" do
       input = File.read("./spec/fixtures/detect_single_char_xor.txt").split("\n")
-      expect(detect_single_char_xor(input)).to eq ["Now that the party is jumping\n", "5", 224]
+      expect(detect_single_char_xor(input).take(2)).to eq ["Now that the party is jumping\n", 53]
     end
   end
 end

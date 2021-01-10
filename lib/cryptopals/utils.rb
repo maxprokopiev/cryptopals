@@ -2,7 +2,8 @@ require 'base64'
 
 module Cryptopals
   module Utils
-    MOST_FREQUENT_LETTERS_EN = %w[e t a o i n s h]
+    MOST_FREQUENT_LETTERS_EN = %w[e t a o i n s h r d l u c m f w g y p b v k x j q z E T A O I N S H R D L U C M F W G Y P B V K X J Q Z]
+    ALPHABET = ("A".."Z").to_a + ("a".."z").to_a + [" ", ":", ",", ".", ";", "'", "-", "&", "%", "$", "^", "=", "\n"]
 
     def hex_to_base64(s)
       Base64.strict_encode64(hex_to_str(s))
@@ -17,15 +18,13 @@ module Cryptopals
     end
 
     def frequencies(s)
-      s.downcase.scan(/./).reduce(Hash.new(0)) { |h, c| h[c] += 1; h }
+      s.scan(/./).reduce(Hash.new(0)) { |h, c| h[c] += 1; h }
     end
 
     def en_score(s)
-      letters = ("0".."9").to_a + ("a".."z").to_a
-
       frequencies(s).reduce(0) do |score, (c, f)|
-        score += f if letters.include?(c)
-        score += f*10 if (MOST_FREQUENT_LETTERS_EN + [" ", ",", ".", "!", "\n", ":", ";"]).include?(c)
+        score += f if ALPHABET.include?(c)
+        score += f*10 if (MOST_FREQUENT_LETTERS_EN + [" "]).include?(c)
         score
       end
     end

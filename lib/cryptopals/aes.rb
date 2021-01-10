@@ -194,6 +194,16 @@ module Cryptopals
       end.last
     end
 
+    def aes_128_ctr(input, key, nonce = [0]*8)
+      blocks = input.bytes.each_slice(16).to_a
+
+      (0..(blocks.size - 1)).reduce([]) do |acc, i|
+        counter = [i] + [0]*7 # works only on 256 block input
+        ciphertext = encrypt_aes_128_ecb((nonce + counter).pack("c*"), key)
+        acc + xor(ciphertext.bytes.take(blocks[i].size), blocks[i])
+      end.pack("c*")
+    end
+
     def encrypt_aes_128_ecb(input, key)
       aes_128_ecb(:encrypt, input, key)
     end

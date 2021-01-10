@@ -1,6 +1,14 @@
 RSpec.describe Cryptopals::AES do
   include described_class
 
+  describe "#aes_128_ctr" do
+    it "de/encrypts in CTR mode" do
+      input = Base64.decode64("L77na/nrFsKvynd6HzOoG7GHTLXsTVu9qvY/2syLXzhPweyyMTJULu/6/kXX0KSvoOLSFQ==")
+      key = "YELLOW SUBMARINE"
+      expect(aes_128_ctr(input, key)).to eq "Yo, VIP Let's kick it Ice, Ice, baby Ice, Ice, baby "
+    end
+  end
+
   describe "#decrypt_aes_128_ecb" do
     it "decrypts AES 128 in ECB mode" do
       input = Base64.decode64(File.read("./spec/fixtures/aes_128_ecb.txt").split("\n").join)

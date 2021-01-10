@@ -17,6 +17,7 @@ RSpec.describe Cryptopals::Utils do
   describe "#strip_pkcs7" do
     it "strips padding if it's valid" do
       expect(strip_pkcs7("ICE ICE BABY\x04\x04\x04\x04".bytes)).to eq "ICE ICE BABY".bytes
+      expect(strip_pkcs7("ICE ICE BABY\x05\x05\x05\x05\x05".bytes)).to eq "ICE ICE BABY".bytes
     end
 
     it "throws an exception on invalid padding" do

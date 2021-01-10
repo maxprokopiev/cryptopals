@@ -45,7 +45,7 @@ module Cryptopals
 
     def strip_pkcs7(bytes)
       last = bytes.last
-      raise Error.new unless bytes[-last..-1] == [last] * 4
+      raise Error.new unless bytes[-last..-1] == [last] * last
 
       bytes[0..-(last + 1)]
     end

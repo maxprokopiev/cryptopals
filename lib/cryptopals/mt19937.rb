@@ -14,14 +14,14 @@ module Cryptopals
     L = 18
     F = 1812433253
 
-    def initialize
+    def initialize(seed_value = 5489)
       @mask = 2**W - 1
       @mt = []
       @index = N + 1
       @lower_mask = (1 << R) - 1
       @upper_mask = (~@lower_mask) & @mask
 
-      seed
+      seed(seed_value)
     end
 
     def extract_number
@@ -46,7 +46,7 @@ module Cryptopals
 
     private
 
-    def seed(value = 5489)
+    def seed(value)
       @index = N
       @mt[0] = value
       (1..(N - 1)).each { |i| @mt[i] = (F * (@mt[i - 1] ^ (@mt[i - 1] >> (W - 2))) + i) & @mask }
